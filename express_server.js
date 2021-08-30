@@ -1,6 +1,9 @@
 const express = require("express");
+const morgan = require('morgan');
 const app = express();
 const PORT = 8080; // default port 8080
+
+app.use(morgan('dev'));
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
