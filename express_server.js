@@ -8,7 +8,8 @@ app.use(morgan('dev'));
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "9sm5xK": "http://www.google.com",
+  "3Dz5idJ": "https://www.twitter.com"
 };
 
 app.get("/", (req, res) => {
@@ -29,7 +30,7 @@ app.get("/urls", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
   const longURL = urlDatabase[shortURL]
-  
+
   const templateVars = { shortURL, longURL };
   res.render("urls_show", templateVars);
 });
