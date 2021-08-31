@@ -8,6 +8,10 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 app.use(morgan('dev'));
 
+function generateRandomString() {
+  const length = 6
+  return Math.random().toString(30).substr(4, length);
+};
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
