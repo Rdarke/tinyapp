@@ -10,13 +10,12 @@ app.use(morgan('dev'));
 
 function generateRandomString() {
   const length = 6
-  return Math.random().toString(30).substr(4, length);
+  return Math.random().toString(36).substr(4, length);
 };
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
-  "3Dz5idJ": "https://www.twitter.com"
+  "9sm5xK": "http://www.google.com"
 };
 
 app.get("/", (req, res) => {
@@ -51,7 +50,11 @@ app.get("/hello", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
+  const shortGenerate = generateRandomString();
+  urlDatabase[shortGenerate] = {
+    shortURL: shortGenerate,
+    longURL: req.body.longURL
+  }
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
