@@ -33,6 +33,15 @@ const users = {
   }
 };
 
+const emailLookup = (email) => {
+  for (userID in users) {
+    if (users[userID].email === email) {
+    return true;
+    }
+    return false;
+  }
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -132,9 +141,16 @@ app.post("/register", (req, res) => {
   const userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-
-  users[userID] = { id: userID, email, password };
-  console.log(users);
+  
+  if (email.length === 0 || password.length === 0) {
+    res.status(400).send("Error - Must include a valid email address! Return to the previous page :)");
+  }
+  if (emailLookup(email) === true) {
+    res.status(400).send("Error - Email in use. Please return to the previous page.");
+  } else {
+    users[userID] = { id: userID, email, password };
+  }
+  
   res.cookie("user_id", userID);
   res.redirect(`/urls`);
 });
