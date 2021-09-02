@@ -10,16 +10,19 @@ app.set("view engine", "ejs");
 app.use(morgan('dev'));
 app.use(cookieParser());
 
+//helper function..............
 function generateRandomString() {
   const length = 6
   return Math.random().toString(36).substr(4, length);
 };
 
+// URl database.................
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
+//Userdatabase object ...........
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -33,6 +36,7 @@ const users = {
   }
 };
 
+// helper function.....................
 const emailLookup = (email) => {
   for (userID in users) {
     if (users[userID].email === email) {
@@ -42,6 +46,7 @@ const emailLookup = (email) => {
   }
 };
 
+// get endpoints.................
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -93,6 +98,7 @@ app.get("/register", (req, res) => {
   res.render("register_user", templateVars);
 });
 
+// post endpoints...........................
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
@@ -150,7 +156,7 @@ app.post("/register", (req, res) => {
   } else {
     users[userID] = { id: userID, email, password };
   }
-  
+
   res.cookie("user_id", userID);
   res.redirect(`/urls`);
 });
