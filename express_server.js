@@ -208,10 +208,11 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
+  const userID = req.cookies["user_id"];
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
 
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = { longURL, userID }
   res.redirect(`/urls`);
 });
 
