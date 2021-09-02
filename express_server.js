@@ -18,8 +18,14 @@ function generateRandomString() {
 
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    LongURL: "http://www.lighthouselabs.ca",
+    UserID: "userRandomID"
+  },
+  "9sm5xK": {
+    LongURL: "http://www.google.com",
+    UserID: "userRandomID"
+  }
 };
 
 const users = { 
@@ -86,7 +92,9 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
-  const longURL = urlDatabase[shortURL];
+  const URLinfo = urlDatabase[shortURL]
+  const longURL = URLinfo.LongURL;
+  console.log("This is the long URL", longURL);
   const userID = req.cookies["user_id"];
   const user = users[userID];
   const templateVars = { shortURL, longURL, user };
