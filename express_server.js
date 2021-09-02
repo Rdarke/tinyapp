@@ -19,12 +19,12 @@ function generateRandomString() {
 
 const urlDatabase = {
   "b2xVn2": {
-    LongURL: "http://www.lighthouselabs.ca",
-    UserID: "userRandomID"
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "userRandomID"
   },
   "9sm5xK": {
-    LongURL: "http://www.google.com",
-    UserID: "userRandomID"
+    longURL: "http://www.google.com",
+    userID: "userRandomID"
   }
 };
 
@@ -62,6 +62,17 @@ const findUserByEmail = (obj, cb) => {
   }
 };
 
+const getUrlsByUser = (obj, cb) => {
+  let urls = {}
+  for (let key in obj) {
+    if (cb(obj[key])) {
+      const longURL = obj[key].longURL;
+      urls[key] = longURL;
+    }
+  }
+  return(urls);
+};
+
 // Main Server GET Endpoints..............................................
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -74,8 +85,12 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
-  const templateVars = { urls: urlDatabase, user };
+  const urls = (getUrlsByUser(urlDatabase, (key) => key.userID === userID))
+  const templateVars = { urls, user };
 
+  if (!userID) {
+    res.redirect("/permissions");
+  };
   res.render("urls_index", templateVars);
 });
 
@@ -91,20 +106,27 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const { shortURL } = req.params;
-  const URLinfo = urlDatabase[shortURL]
-  const longURL = URLinfo.LongURL;
-  console.log("This is the long URL", longURL);
   const userID = req.cookies["user_id"];
   const user = users[userID];
-  const templateVars = { shortURL, longURL, user };
+  const shortURL = req.params.shortURL;
+  const urlsInfo = urlDatabase[shortURL];
+  const urlsID = urlsInfo.userID;
+  const longURL = urlsInfo.longURL;
 
+  if (!userID) {
+    res.redirect("/permissions");
+  }
+  else if (userID !== urlsID ) {
+    res.redirect("/permissions");
+  };
+  const templateVars = { shortURL, longURL, user };
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  const { shortURL } = req.params;
-  const longURL = urlDatabase[shortURL];
+app.get("/u/:shortURL", (req, res) => { // need logic to send error message if /u/:shortURL ie :ID incorect 
+  const shortURL = req.params.shortURL;
+  const urlsInfo = urlDatabase[shortURL];
+  const longURL = urlsInfo.longURL;
   res.redirect(longURL);
 });
 
@@ -134,6 +156,19 @@ app.get("/login", (req, res) => {
   res.render("user_login", templateVars);
 });
 
+app.get("/permissions", (req, res) => {
+  const userID = req.cookies["user_id"];
+  const user = users[userID];
+  const templateVars = { user };
+  
+  if (userID) {
+    res.redirect("urls");
+  }
+  res.render("permission_denied", templateVars);
+});
+
+
+
 //Main server POST endpoints...................................................
 app.post("/urls", (req, res) => {
   const userID = req.cookies["user_id"];
@@ -141,26 +176,26 @@ app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   
   if(userID) {
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = { longURL, userID };
   };
+  console.log("This is the URL database: ", urlDatabase) // remove later.
   res.redirect(`/urls/${shortURL}`);
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.post("/urls/:shortURL/delete", (req, res) => { 
   const { shortURL } = req.params;
 
   delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
 
-app.post("/urls/:shortURL/edit", (req, res) => {
-  const { shortURL } = req.params;
-
+app.post("/urls/:shortURL/edit", (req, res) => { // not working becasue it does not pick up the userID
+  const shortURL = req.params.shortURL;
   res.redirect(`/urls/${shortURL}`);
 });
 
-app.post("/urls/:shortURL", (req, res) => {
-  const { shortURL } = req.params;
+app.post("/urls/:shortURL", (req, res) => { // not working?
+  const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
 
   urlDatabase[shortURL] = longURL;
@@ -196,11 +231,9 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
   
   if (email.length === 0 || password.length === 0) {
-    console.log("No email");
     res.status(400).send("Error - Must include a valid email address! Return to the previous page :)");
   }
   else if (emailLookup(email, users) === true) {
-    console.log("Email in use");
     res.status(400).send("Error - Email in use. Please return to the previous page.");
   } else {
     users[userID] = { id: userID, email, password };
