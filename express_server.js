@@ -10,19 +10,18 @@ app.set("view engine", "ejs");
 app.use(morgan('dev'));
 app.use(cookieParser());
 
-//helper function..............
+
 function generateRandomString() {
   const length = 6
   return Math.random().toString(36).substr(4, length);
 };
 
-// URl database.................
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
-//Userdatabase object ...........
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -36,17 +35,19 @@ const users = {
   }
 };
 
-// helper function.....................
-const emailLookup = (email) => {
-  for (userID in users) {
-    if (users[userID].email === email) {
-    return true;
+const emailLookup = (address, obj) => {
+  let count = 0;
+  for (let key in obj) {
+    if (obj[key].email === address) {
+    count += 1;
     }
-    return false;
   }
+  if (count > 0) {
+    return true;
+  }
+  return false;
 };
 
-// get endpoints.................
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -106,7 +107,7 @@ app.get("/login", (req, res) => {
   res.render("user_login", templateVars);
 });
 
-// post endpoints...........................
+
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
@@ -138,9 +139,21 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const username = req.body.username;
+  console.log("Req body: ", req.body);
+  const email = req.body.email;
+  console.log("Email: ", email);
+  const password = req.body.password;
+  console.log("Pass:", password);
 
-  res.cookie("username", username);
+  if (emailLookup(email, users) === false) {
+    console.log("Email does not match our records");
+    res.status(400).send("Error - Must include a valid email address! Return to the previous page :)");
+  }
+  if (emailLookup(email, users) === true && password !== users.id[email].password) {
+    console.log("Email checks out but passwords no match:", users.id[email].password);
+  }
+
+  res.cookie("user_id", userID);
   res.redirect(`/urls`);
 });
 
@@ -157,14 +170,15 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
   
   if (email.length === 0 || password.length === 0) {
+    console.log("No email");
     res.status(400).send("Error - Must include a valid email address! Return to the previous page :)");
   }
-  if (emailLookup(email) === true) {
+  else if (emailLookup(email, users) === true) {
+    console.log("Email in use");
     res.status(400).send("Error - Email in use. Please return to the previous page.");
   } else {
     users[userID] = { id: userID, email, password };
   }
-
   res.cookie("user_id", userID);
   res.redirect(`/urls`);
 });
