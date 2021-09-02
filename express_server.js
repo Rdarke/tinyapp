@@ -56,8 +56,8 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const userID = req.cookies["user_id"]
-  const user = users[userID]
+  const userID = req.cookies["user_id"];
+  const user = users[userID];
   const templateVars = { urls: urlDatabase, user };
 
   res.render("urls_index", templateVars);
@@ -73,8 +73,8 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
   const longURL = urlDatabase[shortURL];
-  const userID = req.cookies["user_id"]
-  const user = users[userID]
+  const userID = req.cookies["user_id"];
+  const user = users[userID];
   const templateVars = { shortURL, longURL, user };
 
   res.render("urls_show", templateVars);
@@ -91,11 +91,19 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const userID = req.cookies["user_id"]
-  const user = users[userID]
+  const userID = req.cookies["user_id"];
+  const user = users[userID];
   const templateVars = { user };
 
   res.render("register_user", templateVars);
+});
+
+app.get("/login", (req, res) => {
+  const userID = req.cookies["user_id"];
+  const user = users[userID];
+  const templateVars = { user };
+
+  res.render("user_login", templateVars);
 });
 
 // post endpoints...........................
