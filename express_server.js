@@ -48,6 +48,15 @@ const emailLookup = (address, obj) => {
   return false;
 };
 
+const findUserByEmail = (obj, cb) => {
+  for (let key in obj) {
+    if (cb(obj[key])) {
+      return(key);
+    }
+  }
+};
+
+// Main Server GET Endpoints..............................................
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -107,13 +116,12 @@ app.get("/login", (req, res) => {
   res.render("user_login", templateVars);
 });
 
-
+//Main server POST endpoints...................................................
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
 
   urlDatabase[shortURL] = longURL;
-
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -139,20 +147,17 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  console.log("Req body: ", req.body);
   const email = req.body.email;
-  console.log("Email: ", email);
   const password = req.body.password;
-  console.log("Pass:", password);
-
+  const userID = (findUserByEmail(users, (key) => key.email === email));
+  const user = users[userID];
+  
   if (emailLookup(email, users) === false) {
-    console.log("Email does not match our records");
-    res.status(400).send("Error - Must include a valid email address! Return to the previous page :)");
+    res.status(403).send("Error - Must include a valid email address! Return to the previous page :)");
+  } 
+  else if (user.password !== password) {
+    res.status(403).send("Error - Incorrect password! Return to the previous page :)");
   }
-  if (emailLookup(email, users) === true && password !== users.id[email].password) {
-    console.log("Email checks out but passwords no match:", users.id[email].password);
-  }
-
   res.cookie("user_id", userID);
   res.redirect(`/urls`);
 });
