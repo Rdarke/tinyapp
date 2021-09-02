@@ -77,6 +77,10 @@ app.get("/urls/new", (req, res) => {
   const userID = req.cookies["user_id"]
   const user = users[userID]
   const templateVars = { user };
+  
+  if(!userID) {
+    res.redirect("/login");
+  };
   res.render("urls_new", templateVars);
 });
 
@@ -124,10 +128,13 @@ app.get("/login", (req, res) => {
 
 //Main server POST endpoints...................................................
 app.post("/urls", (req, res) => {
+  const userID = req.cookies["user_id"];
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
-
+  
+  if(userID) {
   urlDatabase[shortURL] = longURL;
+  };
   res.redirect(`/urls/${shortURL}`);
 });
 
