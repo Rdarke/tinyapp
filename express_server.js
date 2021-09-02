@@ -183,18 +183,31 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => { 
-  const { shortURL } = req.params;
+  const userID = req.cookies["user_id"];
+  const user = users[userID];
+  const shortURL = req.params.shortURL;
+  const urlsInfo = urlDatabase[shortURL];
+  const urlsID = urlsInfo.userID;
 
-  delete urlDatabase[shortURL];
+  if (userID === urlsID ) {
+    delete urlDatabase[shortURL];
+  };
   res.redirect("/urls");
 });
 
-app.post("/urls/:shortURL/edit", (req, res) => { // not working becasue it does not pick up the userID
+app.post("/urls/:shortURL/edit", (req, res) => {
+  const userID = req.cookies["user_id"];
+  const user = users[userID];
   const shortURL = req.params.shortURL;
-  res.redirect(`/urls/${shortURL}`);
+  const urlsInfo = urlDatabase[shortURL];
+  const urlsID = urlsInfo.userID;
+
+  if (userID === urlsID ) {
+    res.redirect(`/urls/${shortURL}`)
+  };
 });
 
-app.post("/urls/:shortURL", (req, res) => { // not working?
+app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
 
