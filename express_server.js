@@ -222,13 +222,14 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   const userID = (findUserByEmail(users, (key) => key.email === email));
   const user = users[userID];
+  const hashedPassword = user.hashedPassword;
   
   if (emailLookup(email, users) === false) {
     res.status(403).send("Error - Must include a valid email address! Return to the previous page :)");
   } 
-  else if (user.password !== password) {
+  else if (bcrypt.compareSync(password, hashedPassword) === false) {
     res.status(403).send("Error - Incorrect password! Return to the previous page :)");
-  }
+  };
   res.cookie("user_id", userID);
   res.redirect(`/urls`);
 });
