@@ -12,10 +12,7 @@ app.set("view engine", "ejs");
 app.use(morgan('dev'));
 app.use(cookieSession({
   name: 'session',
-  keys: ["key1"],
-
-  // Cookie Options
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  keys: ["key1", "key2"],
 }));
 
 
@@ -156,10 +153,6 @@ app.get("/u/:shortURL", (req, res) => { // need logic to send error message if /
   res.redirect(longURL);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
 app.get("/register", (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
@@ -260,10 +253,10 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  const userID = req.cookies["user_id"]
+  const userID = req.session.user_id;
 
   req.session = null;
-  res.redirect(`/home`);
+  res.redirect(`/login`);
 });
 
 app.post("/register", (req, res) => {
