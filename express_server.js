@@ -266,13 +266,13 @@ app.post("/register", (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10);
   
   if (email.length === 0 || password.length === 0) {
-    res.status(400).send("Error - Must include a valid email address! Return to the previous page :)");
+    res.status(400).send("Error - Must include a valid email & password! Return to the previous page :)");
   }
   else if (emailLookup(email, users) === true) {
     res.status(400).send("Error - Email in use. Please return to the previous page.");
   } else {
     users[userID] = { id: userID, email, hashedPassword };
-  }
+  };
   console.log("Users Object ==:", users);
   res.cookie("user_id", userID);
   res.redirect(`/urls`);
