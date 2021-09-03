@@ -15,13 +15,10 @@ app.use(cookieSession({
   keys: ["key1", "key2"],
 }));
 
+// Imports helper functions. 
+const { findUserByEmail, getUrlsByUser, generateRandomString, emailLookup } = require("./helpers");
 
-function generateRandomString() {
-  const length = 6
-  return Math.random().toString(36).substr(4, length);
-};
-
-
+// Url database by user id.
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
@@ -33,6 +30,7 @@ const urlDatabase = {
   }
 };
 
+// User database object.
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -46,39 +44,8 @@ const users = {
   }
 };
 
-const emailLookup = (address, obj) => {
-  let count = 0;
-  for (let key in obj) {
-    if (obj[key].email === address) {
-    count += 1;
-    }
-  }
-  if (count > 0) {
-    return true;
-  }
-  return false;
-};
 
-const findUserByEmail = (obj, cb) => {
-  for (let key in obj) {
-    if (cb(obj[key])) {
-      return(key);
-    }
-  }
-};
-
-const getUrlsByUser = (obj, cb) => {
-  let urls = {}
-  for (let key in obj) {
-    if (cb(obj[key])) {
-      const longURL = obj[key].longURL;
-      urls[key] = longURL;
-    }
-  }
-  return(urls);
-};
-
-// Main Server GET Endpoints..............................................
+// Main Server GET Endpoints.........................................
 app.get("/", (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
@@ -197,7 +164,6 @@ app.post("/urls", (req, res) => {
   if(userID) {
   urlDatabase[shortURL] = { longURL, userID };
   };
-  console.log("This is the URL database: ", urlDatabase) // remove later.
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -208,7 +174,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const urlsInfo = urlDatabase[shortURL];
   const urlsID = urlsInfo.userID;
 
-  if (userID === urlsID ) {
+  if (userID === urlsID) {
     delete urlDatabase[shortURL];
   };
   res.redirect("/urls");
@@ -243,10 +209,10 @@ app.post("/login", (req, res) => {
   const hashedPassword = user.hashedPassword;
   
   if (emailLookup(email, users) === false) {
-    res.status(403).send("Error - Must include a valid email address! Return to the previous page :)");
+    res.status(403).send("Error 403 - Must include a valid email address! Return to the previous page :)");
   } 
   else if (bcrypt.compareSync(password, hashedPassword) === false) {
-    res.status(403).send("Error - Incorrect password! Return to the previous page :)");
+    res.status(403).send("Error 403 - Incorrect password! Return to the previous page :)");
   };
   req.session.user_id = userID;
   res.redirect(`/urls`);
@@ -266,10 +232,10 @@ app.post("/register", (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10);
   
   if (email.length === 0 || password.length === 0) {
-    res.status(400).send("Error - Must include a valid email & password! Return to the previous page :)");
+    res.status(400).send("Error 400 - Must include a valid email & password! Return to the previous page :)");
   }
   else if (emailLookup(email, users) === true) {
-    res.status(400).send("Error - Email in use. Please return to the previous page.");
+    res.status(400).send("Error 400 - Email in use. Please return to the previous page.");
   } else {
     users[userID] = { id: userID, email, hashedPassword };
   };
