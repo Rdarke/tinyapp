@@ -22,4 +22,9 @@ describe('findUserByEmail', function() {
     const expectedOutput = "userRandomID";
     assert.strictEqual(output, expectedOutput);
   });
+  it('Non-existent email should return undefined.', function() {
+    
+    const output = findUserByEmail(testUsers, (key) => key.email === "test@gmail.com")
+    assert.strictEqual(output, undefined);
+  });
 });
