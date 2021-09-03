@@ -76,7 +76,25 @@ const getUrlsByUser = (obj, cb) => {
 
 // Main Server GET Endpoints..............................................
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const userID = req.cookies["user_id"];
+  const user = users[userID];
+  const templateVars = { user };
+  
+  if (userID) {
+    res.redirect("/urls");
+  };
+  res.render("main_home", templateVars);
+});
+
+app.get("/home", (req, res) => {
+  const userID = req.cookies["user_id"];
+  const user = users[userID];
+  const templateVars = { user };
+
+  if (userID) {
+    res.redirect("/urls");
+  };
+  res.render("main_home", templateVars);
 });
 
 app.get("/urls.json", (req, res) => {
@@ -238,7 +256,7 @@ app.post("/logout", (req, res) => {
   const userID = req.cookies["user_id"]
 
   res.clearCookie("user_id", userID);
-  res.redirect(`/urls`);
+  res.redirect(`/home`);
 });
 
 app.post("/register", (req, res) => {
