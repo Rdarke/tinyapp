@@ -16,7 +16,7 @@ app.use(cookieSession({
 }));
 
 // Import helper functions. 
-const { findUserByEmail, getUrlsByUser, generateRandomString, emailLookup } = require("./helpers");
+const { findUserByEmail, getUrlsByUser, generateRandomString, emailLookup, objectKeyChecker } = require("./helpers");
 
 // Url database by user id.
 const urlDatabase = {};
@@ -73,7 +73,7 @@ app.get("/urls/new", (req, res) => {
   const user = users[userID];
   const templateVars = { user };
   
-  if(!userID) {
+  if (!userID) {
     res.redirect("/login");
   }
   res.render("urls_new", templateVars);
@@ -84,6 +84,11 @@ app.get("/urls/:shortURL", (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
   const shortURL = req.params.shortURL;
+
+  if (objectKeyChecker(shortURL, urlDatabase) === false) {
+    res.status(404).send("<html><body><b>Error 404</b> - Page not found! Return to the previous page</body></html>\n");
+  }
+
   const urlsInfo = urlDatabase[shortURL];
   const urlsID = urlsInfo.userID;
   const longURL = urlsInfo.longURL;
@@ -94,15 +99,21 @@ app.get("/urls/:shortURL", (req, res) => {
   else if (userID !== urlsID ) {
     res.redirect("/permissions");
   }
+  
   const templateVars = { shortURL, longURL, user };
   res.render("urls_show", templateVars);
 });
 
 // get endpoint.........................
-app.get("/u/:shortURL", (req, res) => { // need logic to send error message if /u/:shortURL ie :ID incorect 
+app.get("/u/:shortURL", (req, res) => { 
   const shortURL = req.params.shortURL;
-  const urlsInfo = urlDatabase[shortURL];
+  
+  if (objectKeyChecker(shortURL, urlDatabase) === false) {
+    res.status(404).send("<html><body><b>Error 404</b> - Page not found! Return to the previous page</body></html>\n");
+  }
   const longURL = urlsInfo.longURL;
+  const urlsInfo = urlDatabase[shortURL];
+
   res.redirect(longURL);
 });
 
@@ -112,7 +123,7 @@ app.get("/register", (req, res) => {
   const user = users[userID];
   const templateVars = { user };
 
-  if(userID) {
+  if (userID) {
     res.redirect("/urls");
   }
   res.render("register_user", templateVars);
@@ -124,7 +135,7 @@ app.get("/login", (req, res) => {
   const user = users[userID];
   const templateVars = { user };
 
-  if(userID) {
+  if (userID) {
     res.redirect("/urls");
   }
   res.render("user_login", templateVars);
@@ -151,7 +162,7 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   
-  if(userID) {
+  if (userID) {
   urlDatabase[shortURL] = { longURL, userID };
   }
   res.redirect(`/urls/${shortURL}`);
@@ -180,7 +191,7 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   const urlsID = urlsInfo.userID;
 
   if (userID === urlsID ) {
-    res.redirect(`/urls/${shortURL}`)
+    res.redirect(`/urls/${shortURL}`);
   }
 });
 
@@ -190,7 +201,7 @@ app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
 
-  urlDatabase[shortURL] = { longURL, userID }
+  urlDatabase[shortURL] = { longURL, userID };
   res.redirect(`/urls`);
 });
 

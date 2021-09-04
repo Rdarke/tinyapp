@@ -1,4 +1,4 @@
-// Function will return a users ID key via the users database. 
+// Function - will return a users ID key via the users database. 
 const findUserByEmail = (obj, cb) => {
   for (let key in obj) {
     if (cb(obj[key])) {
@@ -7,13 +7,13 @@ const findUserByEmail = (obj, cb) => {
   }
 };
 
-// Function will create a random string to be used for ID values
+// Function - will create a random string to be used for ID values
 function generateRandomString() {
   const length = 6
   return Math.random().toString(36).substr(4, length);
 };
 
-// Function will return true or false if a users email is stored within the database.
+// Function - will return true or false if a users email is stored within the database.
 const emailLookup = (address, obj) => {
   let count = 0;
   for (let key in obj) {
@@ -27,7 +27,7 @@ const emailLookup = (address, obj) => {
   return false;
 };
 
-//Function will return a spcifed users "urls" via a new object.  
+//Function - will return a spcifed users "urls" via a new object.  
 const getUrlsByUser = (obj, cb) => {
   let urls = {}
   for (let key in obj) {
@@ -39,10 +39,21 @@ const getUrlsByUser = (obj, cb) => {
   return(urls);
 };
 
+// Function - will return true or false if the key Parameter lives within an object. 
+const objectKeyChecker = (key, obj) => {
+  const keys = Object.keys(obj)
+
+    if (keys.includes(key) === false) {
+      return false;
+    }
+    return true;
+  };
+
 //Do not modify.
 module.exports = {
   findUserByEmail, 
   getUrlsByUser, 
   generateRandomString, 
-  emailLookup
+  emailLookup,
+  objectKeyChecker
 }
