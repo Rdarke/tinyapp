@@ -107,13 +107,12 @@ app.get("/urls/:shortURL", (req, res) => {
 // get endpoint.........................
 app.get("/u/:shortURL", (req, res) => { 
   const shortURL = req.params.shortURL;
+  const urlsInfo = urlDatabase[shortURL];
   
   if (objectKeyChecker(shortURL, urlDatabase) === false) {
     res.status(404).send("<html><body><b>Error 404</b> - Page not found! Return to the previous page</body></html>\n");
   }
   const longURL = urlsInfo.longURL;
-  const urlsInfo = urlDatabase[shortURL];
-
   res.redirect(longURL);
 });
 
@@ -210,13 +209,15 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const userID = (findUserByEmail(users, (key) => key.email === email));
-  const user = users[userID];
-  const hashedPassword = user.hashedPassword;
   
   if (emailLookup(email, users) === false) {
     res.status(403).send("<html><body><b>Error 403</b> - Must include valid email! Return to the previous page</body></html>\n");
   } 
-  else if (bcrypt.compareSync(password, hashedPassword) === false) {
+
+  const user = users[userID];
+  const hashedPassword = user.hashedPassword;
+
+  if (bcrypt.compareSync(password, hashedPassword) === false) {
     res.status(403).send("<html><body><b>Error 403</b> - Incorrect password! Return to the previous page</body></html>\n");
   }
   req.session.user_id = userID;
